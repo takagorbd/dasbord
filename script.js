@@ -34,5 +34,5 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function logout() {
     localStorage.removeItem("isLoggedIn");
-    window.location.href = "index.html";
+    window.location.href = "https://takagorbd.github.io/register-/";
 }
